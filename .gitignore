@@ -2,3 +2,4 @@
 cookies.txt
 data/*
 venv
+!data/example.html
