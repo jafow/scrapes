@@ -13,9 +13,21 @@ fn main() -> std::io::Result<()> {
     for node in doc.find(Name("article")) {
         let article = Document::from(node.html().as_str());
 
-        for node in article.find(Name("h2")).take(2) {
-            let county_and_auditor_name = node;
-            dbg!(county_and_auditor_name.text());
+        for (h2, tabl) in article.find(Name("h2")).zip(article.find(Class("results"))).take(2) {
+            let xp = h2.text();
+            dbg!(xp);
+            let t = tabl.find(Name("td")).next().unwrap();
+            let contact_numbers = t.first_child();
+            let phone = contact_numbers.unwrap().text();
+            let fax = t.next().unwrap().next().unwrap().text();
+            dbg!(&phone);
+            dbg!(&fax);
+
+        }
+
+        // for node in article.find(Name("h2")).take(2) {
+            // let county_and_auditor_name = node;
+            // dbg!(county_and_auditor_name.text());
             // county
             //
             // address 1
@@ -35,7 +47,7 @@ fn main() -> std::io::Result<()> {
             // hours
             //
             // social
-        }
+        // }
     }
     Ok(())
 }
