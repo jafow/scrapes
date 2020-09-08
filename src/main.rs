@@ -2,8 +2,7 @@ use std::path::Path;
 use std::{fs, str};
 
 use select::document::Document;
-use select::node::Node;
-use select::predicate::{Attr, Child, Class, Element, Name, Predicate};
+use select::predicate::{Class, Name};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Address {
@@ -15,11 +14,11 @@ struct Address {
 
 fn name_data(name: &str) -> (String, String) {
     // splits name data into County & Auditor name
-    let s: Vec<&str> = name.split("-").collect();
+    let s: Vec<&str> = name.split('-').collect();
     (String::from(s[0].trim()), String::from(s[1].trim()))
 }
 
-fn to_address<'a>(address: String) -> Option<Address> {
+fn to_address(address: String) -> Option<Address> {
     let pieces = address
         .split_terminator('\u{a0}')
         .map(|x| x.trim())
@@ -40,7 +39,6 @@ fn to_address<'a>(address: String) -> Option<Address> {
 #[test]
 fn trim_address_test() {
     assert_eq!(
-        // Some(String::from("400 Public Square Ste 5 Greenfield IA 55555")),
         Some(Address { street: "400 Public Square Ste 5".to_string(), city: "Greenfield".to_string(), state: "IA".to_string(), zip_code: "50849".to_string()}),
         to_address(String::from("\n\t\t\t\t\t\t\t\t\t\t400 Public Square Ste 5\u{a0}\n\t\t\t\t\t\t\tGreenfield\u{a0}IA\u{a0}50849\n\t\t\t\t\t")));
 }
