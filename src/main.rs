@@ -57,7 +57,7 @@ fn main() -> std::io::Result<()> {
     // output
     let output_data = Path::new("data/output.csv");
     let mut output = OpenOptions::new().create(true).append(true).open(output_data)?;
-    let headers = "state,county,position,name,address,address2,email,fax,phone,website_of_county,source_url,maps_url";
+    let headers = "address_1,state,county,Field 23,location_type,address2,city,state_2,zip,phone,latitude,longitude,has_dropoff,has_phone_number,county_website,validate_url,email,fax,social,inactive,hours,rules,notes,state and counties and county reps copy";
     writeln!(&mut output, "{}", headers)?;
 
     // scrape
@@ -72,7 +72,7 @@ fn main() -> std::io::Result<()> {
             .zip(article.find(Class("results")))
         {
             let mut data: String = String::new();
-            let (county_name, auditor_name) = name_data(&h2.text());
+            let (county_name, _) = name_data(&h2.text());
 
             // get data elements holding contact and location info
             let td_selections = table
@@ -86,33 +86,50 @@ fn main() -> std::io::Result<()> {
             let website = td_selections[3].children().next().unwrap().text();
             let mailing_address = to_address(td_selections[5].text()).unwrap();
             let physical_address = to_address(td_selections[6].text()).unwrap();
-            let map_url = td_selections[7]
-                .find(Name("a"))
-                .take(1)
-                .next()
-                .unwrap()
-                .attr("href")
-                .unwrap();
-
-            data.push_str(&format!("{}", "iowa"));
+    
+            // "address_1,state,county,Field 23,location_type,address2,city,state_2,zip,phone,latitude,longitude,has_dropoff,has_phone_number,county_website,validate_url,email,fax,social,inactive,hours,rules,notes,state and counties and county reps copy";
+            data.push_str(&format!("\"{}\"", physical_address.street));
+            data.push_str(&format!(",{}", "iowa"));
             data.push_str(&format!(",{}", county_name));
+
+            // Field 23
+            data.push_str(&format!(",{}", ""));
             data.push_str(&format!(",{}", "auditor"));
-            data.push_str(&format!(",{}", auditor_name));
-            // mailing
-            data.push_str(&format!(",\"{}{}{}{}\"", mailing_address.street, mailing_address.city,  mailing_address.state, mailing_address.zip_code));
-            // physical address
-            data.push_str(&format!(",\"{}{}{}{}\"", physical_address.street, physical_address.city,  physical_address.state, physical_address.zip_code));
 
-            data.push_str(&format!(",{}", email));
+            data.push_str(&format!(",\"{}\"", mailing_address.street));
+            data.push_str(&format!(",{}", mailing_address.city));
 
-            data.push_str(&format!(",{}", fax));
+            data.push_str(&format!(",{}", "IA"));
+
+            data.push_str(&format!(",{}", mailing_address.zip_code));
 
             data.push_str(&format!(",{}", phone));
 
+            data.push_str(&format!(",{}", 0.0_f32));
+            data.push_str(&format!(",{}", 0.0_f32));
+
+            // has dropoff
+            data.push_str(&format!(",{}", ""));
+            data.push_str(&format!(",{}", true));
+
             data.push_str(&format!(",{}", website));
             data.push_str(&format!(",{}", "https://sos.iowa.gov/elections/auditors/auditor.asp?CountyID=00"));
-            // google maps url
-            data.push_str(&format!(",{}", String::from(map_url)));
+
+            data.push_str(&format!(",{}", email));
+            data.push_str(&format!(",{}", fax));
+
+            // social
+            data.push_str(&format!(",{}", ""));
+            // inactive
+            data.push_str(&format!(",{}", ""));
+            // hours
+            data.push_str(&format!(",{}", ""));
+            // rules
+            data.push_str(&format!(",{}", ""));
+            // notes
+            data.push_str(&format!(",{}", ""));
+            // state and counties and county reps copy
+            data.push_str(&format!(",{}", ""));
 
             // write it to the output file
             writeln!(&mut output, "{}", data)?;
